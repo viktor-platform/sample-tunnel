@@ -59,6 +59,7 @@ def __create_segments(points_table_rd, polyline_distances, number_of_segments):
             current_distance += current_segment_distance
             current_segment_distance = segment_distance
 
-        current_segment_distance = dis - current_distance
+        current_segment_distance = segment_distance - (dis - current_distance)
+
     segments.append(points_table_rd[-1])
     return segments
