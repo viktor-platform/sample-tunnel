@@ -18,6 +18,7 @@ SOFTWARE.
 from viktor.core import ViktorController
 from viktor.geometry import GeoPoint
 from viktor.views import MapPoint
+from viktor.views import MapPolygon
 from viktor.views import MapPolyline
 from viktor.views import MapResult
 from viktor.views import MapView
@@ -34,35 +35,13 @@ class TunnelController(ViktorController):
     @MapView('Map', duration_guess=2)
     def visualize_tunnel(self, params, **kwargs) -> MapResult:
         """Set the map view on which the line can be drawn for the tunnel and segments are filled in"""
-        segment_points = create_segments_from_geo_polyline(params.step1.geo_polyline, params.step1.segments)
+        if not params.step1.geo_polyline:
+            return MapResult([])
+
+        segments = create_segments_from_geo_polyline(params.step1.geo_polyline, params.step1.segments)
         features = []
-        for point in segment_points:
-            features.append(MapPoint.from_geo_point(GeoPoint.from_rd(point)))
+        for segment in segments:
+            segment_map_points = [MapPoint.from_geo_point(GeoPoint.from_rd(point)) for point in segment]
+            features.append(MapPolygon(segment_map_points))
         features.append(MapPolyline.from_geo_polyline(params.step1.geo_polyline))
         return MapResult(features)
-
-
-        # if params.step1.geo_polyline:
-        #     polyline = MapPolyline.from_geo_polyline(params.step1.geo_polyline)
-        #     begin = np.array(RDWGSConverter.from_wgs_to_rd((polyline.points[0].lat, polyline.points[0].lon)))
-        #     end = RDWGSConverter.from_wgs_to_rd((polyline.points[1].lat, polyline.points[1].lon))
-        #     direction = end - begin
-        #     # distance = np.linalg.norm(begin - end)
-        #     current_point = begin
-        #     color_cycle = cycle([
-        #         viktor.Color.viktor_black(),
-        #         viktor.Color.viktor_blue(),
-        #         viktor.Color.viktor_yellow()
-        #     ])
-        #     for segment in range(params.step1.segments):
-        #         next_point = current_point + (direction / params.step1.segments)
-        #         print(next_point)
-        #         current_point_wgs = RDWGSConverter.from_rd_to_wgs((current_point[0], current_point[1]))
-        #         next_point_wgs = RDWGSConverter.from_rd_to_wgs((next_point[0], next_point[1]))
-        #         points = [
-        #             MapPoint(current_point_wgs[0], current_point_wgs[1]),
-        #             MapPoint(next_point_wgs[0], next_point_wgs[1])
-        #         ]
-        #         line = MapPolyline(*points, color=next(color_cycle))
-        #         features.append(line)
-        #         current_point = next_point
