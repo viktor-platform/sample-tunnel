@@ -27,3 +27,10 @@ class TunnelParametrization(Parametrization):
     step1.geo_polyline = GeoPolylineField('location of tunnel')
     step1.segments = NumberField('Number of segments', default=5)
 
+    step2 = Step('Define cross section', views='visualize_tunnel_segment')
+    step2.width = NumberField('total width', default=40, suffix='m')
+    step2.height = NumberField('total height', default=20, suffix='m')
+    step2.number_of_sections = NumberField('number of sections', default=2)
+    step2.floor_thickness = NumberField('floor thickness', default=5, suffix='m')
+    step2.roof_thickness = NumberField('roof thickness', default=3, suffix='m')
+    step2.wall_thickness = NumberField('wall thickness', default=5, suffix='m')
