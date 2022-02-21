@@ -14,20 +14,27 @@ SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import numpy as np
 from shapely.geometry import LineString
 from shapely.ops import substring
 
+from viktor import Color
 from viktor.core import ViktorController
+from viktor.external.scia import LoadCase
+from viktor.external.scia import LoadCombination
+from viktor.external.scia import LoadGroup
 from viktor.external.scia import Material as SciaMaterial
 from viktor.external.scia import Model as SciaModel
+from viktor.external.scia import SurfaceLoad
+from viktor.external.scia.object import Subsoil
 from viktor.geometry import Extrusion
 from viktor.geometry import GeoPoint
 from viktor.geometry import GeoPolygon
-from viktor.geometry import GeoPolyline
 from viktor.geometry import Group
 from viktor.geometry import Line
 from viktor.geometry import Material
 from viktor.geometry import Point
+from viktor.geometry import Sphere
 from viktor.views import GeometryResult
 from viktor.views import GeometryView
 from viktor.views import MapPolygon
@@ -73,71 +80,165 @@ class TunnelController(ViktorController):
         geometry_group = self.create_visualization_geometries(params, scia_model)
         return GeometryResult(geometry_group)
 
-    def create_scia_model(self, params) -> SciaModel:
+    @staticmethod
+    def create_scia_model(params) -> SciaModel:
+        """"Create SCIA model"""
         model = SciaModel()
 
-        # create floor slab
+        '''
+        STRUCTURE
+        '''
         line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
         length = line_string.length / params.step1.segments
-
         width = params.step2.width
         height = params.step2.height
         floor_thickness = params.step2.floor_thickness
         roof_thickness = params.step2.roof_thickness
-
-        node_floor_1 = model.create_node('node_floor_1', 0, 0, 0)  # origin
-        node_floor_2 = model.create_node('node_floor_2', 0, length, 0)
-        node_floor_3 = model.create_node('node_floor_3', width, length, 0)
-        node_floor_4 = model.create_node('node_floor_4', width, 0, 0)
-        floor_nodes = [node_floor_1, node_floor_2, node_floor_3, node_floor_4]
+        wall_thickness = params.step2.wall_thickness
         material = SciaMaterial(0, 'concrete_slab')
-        model.create_plane(floor_nodes, floor_thickness, name='floor slab', material=material)
 
-        node_roof_1 = model.create_node('node_roof_1', 0, 0, height)
-        node_roof_2 = model.create_node('node_roof_2', 0, length, height)
-        node_roof_3 = model.create_node('node_roof_3', width, length, height)
-        node_roof_4 = model.create_node('node_roof_4', width, 0, height)
+        # floor
+        node_floor_1 = model.create_node('node_floor_1', 0, 0, floor_thickness / 2)
+        node_floor_2 = model.create_node('node_floor_2', 0, length, floor_thickness / 2)
+        node_floor_3 = model.create_node('node_floor_3', width, length, floor_thickness / 2)
+        node_floor_4 = model.create_node('node_floor_4', width, 0, floor_thickness / 2)
+        floor_nodes = [node_floor_1, node_floor_2, node_floor_3, node_floor_4]
+        floor_plane = model.create_plane(floor_nodes, floor_thickness, name='floor slab', material=material)
+
+        # roof
+        node_roof_1 = model.create_node('node_roof_1', 0, 0, height - roof_thickness / 2)
+        node_roof_2 = model.create_node('node_roof_2', 0, length, height - roof_thickness / 2)
+        node_roof_3 = model.create_node('node_roof_3', width, length, height - roof_thickness / 2)
+        node_roof_4 = model.create_node('node_roof_4', width, 0, height - roof_thickness / 2)
         roof_nodes = [node_roof_1, node_roof_2, node_roof_3, node_roof_4]
-        model.create_plane(roof_nodes, roof_thickness, name='roof slab', material=material)
+        roof_plane = model.create_plane(roof_nodes, roof_thickness, name='roof slab', material=material)
+
+        # section walls
+        sections_x = np.linspace(wall_thickness / 2, width - (wall_thickness / 2), params.step2.number_of_sections + 1)
+        for section_id, pile_x in enumerate(sections_x):
+            n_front_bottom = model.create_node(f'node_section_wall_{section_id}_f_b', pile_x, 0, floor_thickness / 2)
+            n_front_top = model.create_node(f'node_section_wall_{section_id}_f_t', pile_x, 0,
+                                            height - roof_thickness / 2)
+            n_back_bottom = model.create_node(f'node_section_wall_{section_id}_b_b', pile_x, length,
+                                              floor_thickness / 2)
+            n_back_top = model.create_node(f'node_section_wall_{section_id}_b_t', pile_x, length,
+                                           height - roof_thickness / 2)
+
+            model.create_plane([n_front_bottom, n_back_bottom, n_back_top, n_front_top],
+                               wall_thickness,
+                               name=f'section_slab_{section_id}',
+                               material=material
+                               )
+
+        '''
+        SUPPORTS
+        '''
+        subsoil = model.create_subsoil(name='subsoil', stiffness=params.step3.soil_stiffness)
+        model.create_surface_support(floor_plane, subsoil)
+
+        '''
+        sets
+        '''
+        # create the load group
+        lg = model.create_load_group('LG1', LoadGroup.LoadOption.VARIABLE, LoadGroup.RelationOption.STANDARD,
+                                     LoadGroup.LoadTypeOption.CAT_G)
+
+        # create the load case
+        lc = model.create_variable_load_case('LC1', 'first load case', lg, LoadCase.VariableLoadType.STATIC,
+                                             LoadCase.Specification.STANDARD, LoadCase.Duration.SHORT)
+
+        # create the load combination
+        load_cases = {
+            lc: 1
+        }
+
+        model.create_load_combination('C1', LoadCombination.Type.ENVELOPE_SERVICEABILITY, load_cases)
+
+        '''
+        LOADS
+        '''
+        # create the load
+        force = params.step3.roof_load
+        force *= -1  # in negative Z-direction
+        model.create_surface_load('SF:1', lc, roof_plane, SurfaceLoad.Direction.Z, SurfaceLoad.Type.FORCE, force,
+                                  SurfaceLoad.CSys.GLOBAL, SurfaceLoad.Location.LENGTH)
 
         return model
 
-
-    def create_visualization_geometries(self, params, scia_model):
+    @staticmethod
+    def create_visualization_geometries(params, scia_model):
         """The SCIA model is converted to VIKTOR geometry here"""
         geometry_group = Group([])
-        # for node in scia_model.nodes:
-        #     node_obj = Sphere(Point(node.x, node.y, node.z), 1)
-        #     node_obj.material = Material('node', color=Color(0, 255, 0))
-        #     geometry_group.add(node_obj)
+        line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
+        width = params.step2.width
+        length = line_string.length / params.step1.segments
+        height = params.step2.height
+        floor_thickness = params.step2.floor_thickness
+        roof_thickness = params.step2.roof_thickness
+        wall_thickness = params.step2.wall_thickness
+
+        for node in scia_model.nodes:
+            node_obj = Sphere(Point(node.x, node.y, node.z), 0.5)
+            node_obj.material = Material('node', color=Color(0, 255, 0))
+            geometry_group.add(node_obj)
+
+        slab_material = Material('slab', threejs_roughness=1)
 
         floor_points = [
-            Point(scia_model.nodes[0].x, scia_model.nodes[0].y, scia_model.nodes[0].z),
-            Point(scia_model.nodes[1].x, scia_model.nodes[1].y, scia_model.nodes[1].z),
-            Point(scia_model.nodes[2].x, scia_model.nodes[2].y, scia_model.nodes[2].z),
-            Point(scia_model.nodes[3].x, scia_model.nodes[3].y, scia_model.nodes[3].z),
-            Point(scia_model.nodes[0].x, scia_model.nodes[0].y, scia_model.nodes[0].z)
+            Point(0, 0),
+            Point(0, length),
+            Point(width, length),
+            Point(width, 0),
+            Point(0, 0)
         ]
 
-        floor_thickness = params.step2.floor_thickness
+        section_wall_points = [
+            Point(0, 0),
+            Point(0, height - floor_thickness - roof_thickness),
+            Point(length, height - floor_thickness - roof_thickness),
+            Point(length, 0),
+            Point(0, 0)
+        ]
+
         floor_slab_obj = Extrusion(floor_points, Line(Point(0, 0, 0), Point(0, 0, floor_thickness)))
-        slab_material = Material('slab', threejs_roughness=1, threejs_opacity=0.3)
         floor_slab_obj.material = slab_material
         geometry_group.add(floor_slab_obj)
-        #
-        # roof_points = [
-        #     Point(scia_model.nodes[4].x, scia_model.nodes[4].y, scia_model.nodes[4].z),
-        #     Point(scia_model.nodes[5].x, scia_model.nodes[5].y, scia_model.nodes[5].z),
-        #     Point(scia_model.nodes[6].x, scia_model.nodes[6].y, scia_model.nodes[6].z),
-        #     Point(scia_model.nodes[7].x, scia_model.nodes[7].y, scia_model.nodes[7].z),
-        #     Point(scia_model.nodes[4].x, scia_model.nodes[4].y, scia_model.nodes[4].z)
-        # ]
-        #
-        # print(roof_points)
 
-        roof_thickness = params.step2.roof_thickness
-        roof_slab_obj = Extrusion(floor_points, Line(Point(0, 0, scia_model.nodes[4].z - roof_thickness), Point(0, 0, scia_model.nodes[4].z)))
+        roof_slab_obj = Extrusion(
+            floor_points,
+            Line(Point(0, 0, height - roof_thickness), Point(0, 0, height))
+        )
         roof_slab_obj.material = slab_material
         geometry_group.add(roof_slab_obj)
+
+        wall_slab_left_obj = Extrusion(
+            section_wall_points,
+            Line(Point(0, 0, floor_thickness), Point(wall_thickness, 0, floor_thickness)),
+            profile_rotation=90
+        )
+        wall_slab_left_obj.material = slab_material
+        geometry_group.add(wall_slab_left_obj)
+
+        wall_slab_right_obj = Extrusion(
+            section_wall_points,
+            Line(Point(width - wall_thickness, 0, floor_thickness), Point(width, 0, floor_thickness)),
+            profile_rotation=90
+        )
+        wall_slab_right_obj.material = slab_material
+        geometry_group.add(wall_slab_right_obj)
+
+        # create all section walls
+        sections_x = np.linspace(wall_thickness / 2, width - (wall_thickness / 2), params.step2.number_of_sections + 1)
+        for section_x in sections_x[1:-1]:
+            wall_slab_section_obj = Extrusion(
+                section_wall_points,
+                Line(
+                    Point(section_x - wall_thickness / 2, 0, floor_thickness),
+                    Point(section_x + wall_thickness / 2, 0, floor_thickness)
+                ),
+                profile_rotation=90
+            )
+            wall_slab_section_obj.material = slab_material
+            geometry_group.add(wall_slab_section_obj)
 
         return geometry_group

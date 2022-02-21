@@ -24,13 +24,17 @@ from viktor.parametrization import Step
 class TunnelParametrization(Parametrization):
     """Defines the input fields in left-side of the web UI in the Sample entity (Editor)."""
     step1 = Step('Select tunnel location', views='visualize_tunnel')
-    step1.geo_polyline = GeoPolylineField('location of tunnel')
+    step1.geo_polyline = GeoPolylineField('Location of tunnel')
     step1.segments = NumberField('Number of segments', default=5)
 
     step2 = Step('Define cross section', views='visualize_tunnel_segment')
-    step2.width = NumberField('total width', default=40, suffix='m')
-    step2.height = NumberField('total height', default=20, suffix='m')
-    step2.number_of_sections = NumberField('number of sections', default=2)
-    step2.floor_thickness = NumberField('floor thickness', default=5, suffix='m')
-    step2.roof_thickness = NumberField('roof thickness', default=3, suffix='m')
-    step2.wall_thickness = NumberField('wall thickness', default=5, suffix='m')
+    step2.width = NumberField('Total width', default=40, suffix='m')
+    step2.height = NumberField('Total height', default=20, suffix='m')
+    step2.number_of_sections = NumberField('Number of sections', default=2)
+    step2.floor_thickness = NumberField('Floor thickness', default=2, suffix='m')
+    step2.roof_thickness = NumberField('Roof thickness', default=3, suffix='m')
+    step2.wall_thickness = NumberField('Wall thickness', default=3, suffix='m')
+
+    step3 = Step('Define cross section')
+    step3.roof_load = NumberField('Roof load', default=1, suffix='kN/m2')
+    step3.soil_stiffness = NumberField('Soil stiffness', default=400, suffix='MN/m')
