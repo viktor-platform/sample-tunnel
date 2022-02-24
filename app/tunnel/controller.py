@@ -14,6 +14,9 @@ SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from io import BytesIO
+from pathlib import Path
+
 import numpy as np
 from shapely.geometry import LineString
 from shapely.ops import substring
@@ -26,7 +29,7 @@ from viktor.external.scia import LoadGroup
 from viktor.external.scia import Material as SciaMaterial
 from viktor.external.scia import Model as SciaModel
 from viktor.external.scia import SurfaceLoad
-from viktor.external.scia.object import Subsoil
+from viktor.geometry import CircularExtrusion
 from viktor.geometry import Extrusion
 from viktor.geometry import GeoPoint
 from viktor.geometry import GeoPolygon
@@ -35,6 +38,7 @@ from viktor.geometry import Line
 from viktor.geometry import Material
 from viktor.geometry import Point
 from viktor.geometry import Sphere
+from viktor.result import DownloadResult
 from viktor.views import GeometryResult
 from viktor.views import GeometryView
 from viktor.views import MapPolygon
@@ -75,19 +79,53 @@ class TunnelController(ViktorController):
 
     @GeometryView("3D", duration_guess=1)
     def visualize_tunnel_segment(self, params, **kwargs):
-        """"create a SCIA model and views it as a 3D model"""
-        scia_model = self.create_scia_model(params)
-        geometry_group = self.create_visualization_geometries(params, scia_model)
+        """"create a visualization of a tunnel segment"""
+        geometry_group = self.create_visualization_geometries(params)
         return GeometryResult(geometry_group)
+
+    @GeometryView("3D", duration_guess=1)
+    def visualize_tunnel_structure(self, params, **kwargs):
+        """"create a SCIA model and views its structure as a 3D model"""
+        scia_model = self.create_scia_model(params)
+        geometry_group_structure = self.create_structure_visualization(params, scia_model)
+        geometry_group_segment = self.create_visualization_geometries(params, opacity=0.2)
+        for obj in geometry_group_segment.children:
+            geometry_group_structure.add(obj)
+        return GeometryResult(geometry_group_structure)
+
+    def download_scia_input_esa(self, params, **kwargs):
+        """"Download scia input esa file"""
+        scia_input_esa = self.get_scia_input_esa()
+
+        filename = "model.esa"
+        return DownloadResult(scia_input_esa, filename)
+
+    def download_scia_input_xml(self, params, **kwargs):
+        """"Download scia input xml file"""
+        scia_model = self.create_scia_model(params)
+        input_xml, _ = scia_model.generate_xml_input()
+
+        return DownloadResult(input_xml, 'test.xml')
+
+    def download_scia_input_def(self, params, **kwargs):
+        """"Download scia input def file."""
+        m = SciaModel()
+        _, input_def = m.generate_xml_input()
+        return DownloadResult(input_def, 'viktor.xml.def')
+
+    def get_scia_input_esa(self) -> BytesIO:
+        """"Retrieves the model.esa file."""
+        esa_path = Path(__file__).parent / 'scia' / 'model.esa'
+        scia_input_esa = BytesIO()
+        with open(esa_path, "rb") as esa_file:
+            scia_input_esa.write(esa_file.read())
+        return scia_input_esa
 
     @staticmethod
     def create_scia_model(params) -> SciaModel:
         """"Create SCIA model"""
         model = SciaModel()
 
-        '''
-        STRUCTURE
-        '''
         line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
         length = line_string.length / params.step1.segments
         width = params.step2.width
@@ -130,15 +168,10 @@ class TunnelController(ViktorController):
                                material=material
                                )
 
-        '''
-        SUPPORTS
-        '''
+        # create the support
         subsoil = model.create_subsoil(name='subsoil', stiffness=params.step3.soil_stiffness)
         model.create_surface_support(floor_plane, subsoil)
 
-        '''
-        sets
-        '''
         # create the load group
         lg = model.create_load_group('LG1', LoadGroup.LoadOption.VARIABLE, LoadGroup.RelationOption.STANDARD,
                                      LoadGroup.LoadTypeOption.CAT_G)
@@ -154,9 +187,6 @@ class TunnelController(ViktorController):
 
         model.create_load_combination('C1', LoadCombination.Type.ENVELOPE_SERVICEABILITY, load_cases)
 
-        '''
-        LOADS
-        '''
         # create the load
         force = params.step3.roof_load
         force *= -1  # in negative Z-direction
@@ -166,7 +196,7 @@ class TunnelController(ViktorController):
         return model
 
     @staticmethod
-    def create_visualization_geometries(params, scia_model):
+    def create_visualization_geometries(params, opacity=1.0):
         """The SCIA model is converted to VIKTOR geometry here"""
         geometry_group = Group([])
         line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
@@ -177,12 +207,7 @@ class TunnelController(ViktorController):
         roof_thickness = params.step2.roof_thickness
         wall_thickness = params.step2.wall_thickness
 
-        for node in scia_model.nodes:
-            node_obj = Sphere(Point(node.x, node.y, node.z), 0.5)
-            node_obj.material = Material('node', color=Color(0, 255, 0))
-            geometry_group.add(node_obj)
-
-        slab_material = Material('slab', threejs_roughness=1)
+        slab_material = Material('slab', threejs_roughness=1, threejs_opacity=opacity)
 
         floor_points = [
             Point(0, 0),
@@ -200,10 +225,12 @@ class TunnelController(ViktorController):
             Point(0, 0)
         ]
 
+        # floor
         floor_slab_obj = Extrusion(floor_points, Line(Point(0, 0, 0), Point(0, 0, floor_thickness)))
         floor_slab_obj.material = slab_material
         geometry_group.add(floor_slab_obj)
 
+        # roof
         roof_slab_obj = Extrusion(
             floor_points,
             Line(Point(0, 0, height - roof_thickness), Point(0, 0, height))
@@ -211,6 +238,7 @@ class TunnelController(ViktorController):
         roof_slab_obj.material = slab_material
         geometry_group.add(roof_slab_obj)
 
+        # left wall
         wall_slab_left_obj = Extrusion(
             section_wall_points,
             Line(Point(0, 0, floor_thickness), Point(wall_thickness, 0, floor_thickness)),
@@ -219,6 +247,7 @@ class TunnelController(ViktorController):
         wall_slab_left_obj.material = slab_material
         geometry_group.add(wall_slab_left_obj)
 
+        # right wall
         wall_slab_right_obj = Extrusion(
             section_wall_points,
             Line(Point(width - wall_thickness, 0, floor_thickness), Point(width, 0, floor_thickness)),
@@ -242,3 +271,65 @@ class TunnelController(ViktorController):
             geometry_group.add(wall_slab_section_obj)
 
         return geometry_group
+
+    @staticmethod
+    def create_structure_visualization(params, scia_model):
+        geometry_group = Group([])
+        line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
+        floor_thickness = params.step2.floor_thickness
+        roof_thickness = params.step2.roof_thickness
+        width = params.step2.width
+        length = line_string.length / params.step1.segments
+        height_nodes = params.step2.height - roof_thickness / 2
+        wall_thickness = params.step2.wall_thickness
+
+        slab_material = Material('slab', threejs_roughness=1)
+
+        # Draw green spheres at every node
+        for node in scia_model.nodes:
+            node_obj = Sphere(Point(node.x, node.y, node.z), 0.5)
+            node_obj.material = Material('node', color=Color(0, 255, 0))
+            geometry_group.add(node_obj)
+
+        # Draw lines for floor and roof
+        for z in [floor_thickness / 2, height_nodes]:
+            front = CircularExtrusion(0.2, Line(Point(0, 0, z), Point(width, 0, z)))
+            front.material = slab_material
+            geometry_group.add(front)
+
+            right = CircularExtrusion(0.2, Line(Point(width, 0, z), Point(width, length, z)))
+            right.material = slab_material
+            geometry_group.add(right)
+
+            back = CircularExtrusion(0.2, Line(Point(width, length, z), Point(0, length, z)))
+            back.material = slab_material
+            geometry_group.add(back)
+
+            left = CircularExtrusion(0.2, Line(Point(0, length, z), Point(0, 0, z)))
+            left.material = slab_material
+            geometry_group.add(left)
+
+        # Draw lines for all sections
+        sections_x = np.linspace(wall_thickness / 2, width - (wall_thickness / 2), params.step2.number_of_sections + 1)
+        for x in sections_x:
+            front = CircularExtrusion(0.2, Line(Point(x, 0, floor_thickness / 2), Point(x, 0, height_nodes)))
+            front.material = slab_material
+            geometry_group.add(front)
+
+            back = CircularExtrusion(0.2, Line(Point(x, length, floor_thickness / 2), Point(x, length, height_nodes)))
+            back.material = slab_material
+            geometry_group.add(back)
+
+            bottom = CircularExtrusion(0.2, Line(Point(x, 0, floor_thickness / 2), Point(x, length, floor_thickness / 2)))
+            bottom.material = slab_material
+            geometry_group.add(bottom)
+
+            top = CircularExtrusion(0.2, Line(Point(x, 0, height_nodes), Point(x, length, height_nodes)))
+            top.material = slab_material
+            geometry_group.add(top)
+
+        return geometry_group
+
+
+
+

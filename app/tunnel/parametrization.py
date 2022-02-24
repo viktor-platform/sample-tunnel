@@ -15,6 +15,7 @@ SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from viktor.parametrization import DownloadButton
 from viktor.parametrization import GeoPolylineField
 from viktor.parametrization import NumberField
 from viktor.parametrization import Parametrization
@@ -35,6 +36,9 @@ class TunnelParametrization(Parametrization):
     step2.roof_thickness = NumberField('Roof thickness', default=3, suffix='m')
     step2.wall_thickness = NumberField('Wall thickness', default=3, suffix='m')
 
-    step3 = Step('Define cross section')
+    step3 = Step('Define cross section', views='visualize_tunnel_structure')
     step3.roof_load = NumberField('Roof load', default=1, suffix='kN/m2')
     step3.soil_stiffness = NumberField('Soil stiffness', default=400, suffix='MN/m')
+    step3.input_xml_btn = DownloadButton("Input .xml", method="download_scia_input_xml")
+    step3.input_def_btn = DownloadButton("Input .def", method="download_scia_input_def")
+    step3.input_esa_btn = DownloadButton("Input .esa", method="download_scia_input_esa")
