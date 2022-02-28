@@ -44,5 +44,6 @@ class TunnelParametrization(Parametrization):
     step3.input_xml_btn = DownloadButton('Input .xml', method='download_scia_input_xml')
     step3.input_def_btn = DownloadButton('Input .def', method='download_scia_input_def')
     step3.input_esa_btn = DownloadButton('Input .esa', method='download_scia_input_esa')
+    step3.input_esa_btn1 = DownloadButton('params', method='download_params')
 
     step4 = Step('Analyse engineering report', views='execute_scia_analysis')

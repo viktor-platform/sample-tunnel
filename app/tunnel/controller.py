@@ -17,12 +17,10 @@ SOFTWARE.
 import json
 from io import BytesIO
 from pathlib import Path
-from munch import unmunchify
 
 import numpy as np
 from shapely.geometry import LineString
 from shapely.ops import substring
-
 from viktor import Color
 from viktor.core import ViktorController
 from viktor.external.scia import LoadCase
@@ -74,8 +72,8 @@ class TunnelController(ViktorController):
             begin = i * segment_length
             end = (i + 1) * segment_length
             line_string_sub = substring(line_string, begin, end)
-            left_line = line_string_sub.parallel_offset(40, 'left')
-            right_line = line_string_sub.parallel_offset(40, 'right')
+            left_line = line_string_sub.parallel_offset(params.step2.width, 'left')
+            right_line = line_string_sub.parallel_offset(params.step2.width, 'right')
             linestring_points = list(left_line.coords) + list(right_line.coords)
             polygon = GeoPolygon(*[GeoPoint.from_rd(pt) for pt in linestring_points])
             features.append(MapPolygon.from_geo_polygon(polygon))
@@ -141,13 +139,24 @@ class TunnelController(ViktorController):
             scia_input_esa.write(esa_file.read())
         return scia_input_esa
 
+    # def download_params(self, params, **kwargs):
+    #     # params.step1.geo_polyline = json.loads(str(params.step1.geo_polyline))
+    #     print(params.step1.geo_polyline)
+    #     line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
+    #     length = line_string.length / params.step1.segments
+    #     print(length)
+    #     # return DownloadResult(File.from_data(json.dumps(unmunchify(params)).encode()), "params.json")
+
     @staticmethod
-    def create_scia_model(params) -> SciaModel:
+    def get_segment_length(params):
+        line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
+        return line_string.length / params.step1.segments
+
+    def create_scia_model(self, params) -> SciaModel:
         """"Create SCIA model"""
         model = SciaModel()
 
-        line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
-        length = line_string.length / params.step1.segments
+        length = self.get_segment_length(params)
         width = params.step2.width
         height = params.step2.height
         floor_thickness = params.step2.floor_thickness
@@ -215,13 +224,11 @@ class TunnelController(ViktorController):
 
         return model
 
-    @staticmethod
-    def create_visualization_geometries(params, opacity=1.0):
+    def create_visualization_geometries(self, params, opacity=1.0):
         """The SCIA model is converted to VIKTOR geometry here"""
         geometry_group = Group([])
-        line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
+        length = self.get_segment_length(params)
         width = params.step2.width
-        length = line_string.length / params.step1.segments
         height = params.step2.height
         floor_thickness = params.step2.floor_thickness
         roof_thickness = params.step2.roof_thickness
@@ -292,14 +299,12 @@ class TunnelController(ViktorController):
 
         return geometry_group
 
-    @staticmethod
-    def create_structure_visualization(params, scia_model):
+    def create_structure_visualization(self, params, scia_model):
         geometry_group = Group([])
-        line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
+        length = self.get_segment_length(params)
         floor_thickness = params.step2.floor_thickness
         roof_thickness = params.step2.roof_thickness
         width = params.step2.width
-        length = line_string.length / params.step1.segments
         height_nodes = params.step2.height - roof_thickness / 2
         wall_thickness = params.step2.wall_thickness
 
@@ -340,7 +345,8 @@ class TunnelController(ViktorController):
             back.material = slab_material
             geometry_group.add(back)
 
-            bottom = CircularExtrusion(0.2, Line(Point(x, 0, floor_thickness / 2), Point(x, length, floor_thickness / 2)))
+            bottom = CircularExtrusion(0.2,
+                                       Line(Point(x, 0, floor_thickness / 2), Point(x, length, floor_thickness / 2)))
             bottom.material = slab_material
             geometry_group.add(bottom)
 
@@ -349,7 +355,3 @@ class TunnelController(ViktorController):
             geometry_group.add(top)
 
         return geometry_group
-
-
-
-

@@ -1,0 +1,18 @@
+{
+    "step1": {
+        "segments": 2
+    },
+    "step2": {
+        "width": 40,
+        "height": 12,
+        "number_of_sections": 2,
+        "floor_thickness": 1.5,
+        "roof_thickness": 2,
+        "wall_thickness": 1.2
+    },
+    "step3": {
+        "roof_load": 1,
+        "soil_stiffness": 400
+    },
+    "name": "test"
+}
