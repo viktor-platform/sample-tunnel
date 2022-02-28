@@ -17,6 +17,7 @@ SOFTWARE.
 """
 from viktor.parametrization import DownloadButton
 from viktor.parametrization import GeoPolylineField
+from viktor.parametrization import LineBreak
 from viktor.parametrization import NumberField
 from viktor.parametrization import Parametrization
 from viktor.parametrization import Step
@@ -30,15 +31,18 @@ class TunnelParametrization(Parametrization):
 
     step2 = Step('Define cross section', views='visualize_tunnel_segment')
     step2.width = NumberField('Total width', default=40, suffix='m')
-    step2.height = NumberField('Total height', default=20, suffix='m')
+    step2.height = NumberField('Total height', default=12, suffix='m')
     step2.number_of_sections = NumberField('Number of sections', default=2)
-    step2.floor_thickness = NumberField('Floor thickness', default=2, suffix='m')
-    step2.roof_thickness = NumberField('Roof thickness', default=3, suffix='m')
-    step2.wall_thickness = NumberField('Wall thickness', default=3, suffix='m')
+    step2.floor_thickness = NumberField('Floor thickness', default=1.5, suffix='m')
+    step2.roof_thickness = NumberField('Roof thickness', default=2, suffix='m')
+    step2.wall_thickness = NumberField('Wall thickness', default=1.2, suffix='m')
 
-    step3 = Step('Define cross section', views='visualize_tunnel_structure')
+    step3 = Step('Create SCIA model', views='visualize_tunnel_structure')
     step3.roof_load = NumberField('Roof load', default=1, suffix='kN/m2')
     step3.soil_stiffness = NumberField('Soil stiffness', default=400, suffix='MN/m')
-    step3.input_xml_btn = DownloadButton("Input .xml", method="download_scia_input_xml")
-    step3.input_def_btn = DownloadButton("Input .def", method="download_scia_input_def")
-    step3.input_esa_btn = DownloadButton("Input .esa", method="download_scia_input_esa")
+    step3.ln_break0 = LineBreak()
+    step3.input_xml_btn = DownloadButton('Input .xml', method='download_scia_input_xml')
+    step3.input_def_btn = DownloadButton('Input .def', method='download_scia_input_def')
+    step3.input_esa_btn = DownloadButton('Input .esa', method='download_scia_input_esa')
+
+    step4 = Step('Analyse engineering report', views='execute_scia_analysis')

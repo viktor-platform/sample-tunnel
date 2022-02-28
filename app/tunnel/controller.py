@@ -28,6 +28,8 @@ from viktor.external.scia import LoadCombination
 from viktor.external.scia import LoadGroup
 from viktor.external.scia import Material as SciaMaterial
 from viktor.external.scia import Model as SciaModel
+from viktor.external.scia import ResultType
+from viktor.external.scia import SciaAnalysis
 from viktor.external.scia import SurfaceLoad
 from viktor.geometry import CircularExtrusion
 from viktor.geometry import Extrusion
@@ -45,6 +47,8 @@ from viktor.views import MapPolygon
 from viktor.views import MapPolyline
 from viktor.views import MapResult
 from viktor.views import MapView
+from viktor.views import PDFResult
+from viktor.views import PDFView
 from .parametrization import TunnelParametrization
 
 
@@ -92,6 +96,20 @@ class TunnelController(ViktorController):
         for obj in geometry_group_segment.children:
             geometry_group_structure.add(obj)
         return GeometryResult(geometry_group_structure)
+
+    @PDFView("PDF View", duration_guess=20)
+    def execute_scia_analysis(self, params, **kwargs):
+        """"perform an analysis using SCIA on a third-party worker"""
+        scia_model = self.create_scia_model(params)
+        input_file, xml_def_file = scia_model.generate_xml_input()
+        scia_model = self.get_scia_input_esa()
+
+        scia_analysis = SciaAnalysis(input_file=input_file, xml_def_file=xml_def_file, scia_model=scia_model,
+                                     result_type=ResultType.ENGINEERING_REPORT, output_document='Report_1')
+        scia_analysis.execute(timeout=600)
+        engineering_report = scia_analysis.get_engineering_report(as_file=True)
+
+        return PDFResult(file=engineering_report)
 
     def download_scia_input_esa(self, params, **kwargs):
         """"Download scia input esa file"""
@@ -189,7 +207,7 @@ class TunnelController(ViktorController):
 
         # create the load
         force = params.step3.roof_load
-        force *= -1  # in negative Z-direction
+        force *= -1000  # in negative Z-direction and kN -> n
         model.create_surface_load('SF:1', lc, roof_plane, SurfaceLoad.Direction.Z, SurfaceLoad.Type.FORCE, force,
                                   SurfaceLoad.CSys.GLOBAL, SurfaceLoad.Location.LENGTH)
 
