@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<project xmlns="http://www.scia.cz">
+
+    <def uri="viktor.xml.def"/>
+
+
+
+
+
+    <container id="{8867A6F2-D7E4-11D4-A47F-00C06C542707}" t="DataLibScia.EP_Subsoil.1">
+      <table id="D0089CF8-F58C-439B-8523-50AAE8289811" t="DataLibScia.EP_Subsoil.1" name="Subsoils">
+         <h>
+            <h0 t="Type"/>
+            <h1 t="Specific weight"/>
+            <h2 t="Fi&apos;"/>
+            <h3 t="Sigma oc"/>
+            <h4 t="c&apos;"/>
+            <h5 t="cu"/>
+            <h6 t="C1x"/>
+            <h7 t="C1y"/>
+            <h8 t="Stiffness"/>
+            <h9 t="C2x"/>
+            <h10 t="C2y"/>
+            <h11 t="C1z"/>
+            <h12 t="Water/air in clay subgrade"/>
+            <h13 t="Nonlinear function C1z"/>
+         </h>
+         <obj id="1" nm="subsoil">
+           <p8 v="400.0"/>
+         </obj>
+
+
+      </table>
+   </container>
+
+
+
+    <container id="{31450A87-BE7E-4EA0-BFD2-4544A3E7BA53}" t="EP_Model.10.00.EP_MeshSetup.1">
+      <table id="9C5E8821-5679-4E23-B7CF-D83CE4FB11BC" t="EP_Model.10.00.EP_MeshSetup.1" name="Mesh setup">
+         <h>
+            <h0 t="Division for 2D-1D upgrade"/>
+            <h1 t="Average size of 2d element/curved element"/>
+            <h2 t="Average size of cables, tendons, elements on subsoil, nonlinear soil spring"/>
+         </h>
+            <obj id="1" nm="">
+              <p0 v="50"/>
+              <p1 v="1.0"/>
+              <p2 v="1.0"/>
+            </obj>
+
+        </table>
+    </container>
+
+
+
+
+    <container id="{39A7F468-A0D4-4DFF-8E5C-5843E1807D13}" t="EP_DSG_Elements.EP_StructNode.1">
+        <table id="B1A479D4-C299-4862-8A70-3BA1B0C684B0" t="EP_DSG_Elements.EP_StructNode.1" name="Node">
+            <h>
+                <h0 t="Name"/>
+                <h1 t="Coord X"/>
+                <h2 t="Coord Y"/>
+                <h3 t="Coord Z"/>
+            </h>
+            <obj id="1" nm="node_floor_1">
+              <p0 v="node_floor_1"/>
+              <p1 v="0.0"/>
+              <p2 v="0.0"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="2" nm="node_floor_2">
+              <p0 v="node_floor_2"/>
+              <p1 v="0.0"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="3" nm="node_floor_3">
+              <p0 v="node_floor_3"/>
+              <p1 v="60.0"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="4" nm="node_floor_4">
+              <p0 v="node_floor_4"/>
+              <p1 v="60.0"/>
+              <p2 v="0.0"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="5" nm="node_roof_1">
+              <p0 v="node_roof_1"/>
+              <p1 v="0.0"/>
+              <p2 v="0.0"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="6" nm="node_roof_2">
+              <p0 v="node_roof_2"/>
+              <p1 v="0.0"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="7" nm="node_roof_3">
+              <p0 v="node_roof_3"/>
+              <p1 v="60.0"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="8" nm="node_roof_4">
+              <p0 v="node_roof_4"/>
+              <p1 v="60.0"/>
+              <p2 v="0.0"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="9" nm="node_section_wall_0_f_b">
+              <p0 v="node_section_wall_0_f_b"/>
+              <p1 v="0.6"/>
+              <p2 v="0.0"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="10" nm="node_section_wall_0_f_t">
+              <p0 v="node_section_wall_0_f_t"/>
+              <p1 v="0.6"/>
+              <p2 v="0.0"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="11" nm="node_section_wall_0_b_b">
+              <p0 v="node_section_wall_0_b_b"/>
+              <p1 v="0.6"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="12" nm="node_section_wall_0_b_t">
+              <p0 v="node_section_wall_0_b_t"/>
+              <p1 v="0.6"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="13" nm="node_section_wall_1_f_b">
+              <p0 v="node_section_wall_1_f_b"/>
+              <p1 v="20.2"/>
+              <p2 v="0.0"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="14" nm="node_section_wall_1_f_t">
+              <p0 v="node_section_wall_1_f_t"/>
+              <p1 v="20.2"/>
+              <p2 v="0.0"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="15" nm="node_section_wall_1_b_b">
+              <p0 v="node_section_wall_1_b_b"/>
+              <p1 v="20.2"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="16" nm="node_section_wall_1_b_t">
+              <p0 v="node_section_wall_1_b_t"/>
+              <p1 v="20.2"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="17" nm="node_section_wall_2_f_b">
+              <p0 v="node_section_wall_2_f_b"/>
+              <p1 v="39.8"/>
+              <p2 v="0.0"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="18" nm="node_section_wall_2_f_t">
+              <p0 v="node_section_wall_2_f_t"/>
+              <p1 v="39.8"/>
+              <p2 v="0.0"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="19" nm="node_section_wall_2_b_b">
+              <p0 v="node_section_wall_2_b_b"/>
+              <p1 v="39.8"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="20" nm="node_section_wall_2_b_t">
+              <p0 v="node_section_wall_2_b_t"/>
+              <p1 v="39.8"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="21" nm="node_section_wall_3_f_b">
+              <p0 v="node_section_wall_3_f_b"/>
+              <p1 v="59.4"/>
+              <p2 v="0.0"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="22" nm="node_section_wall_3_f_t">
+              <p0 v="node_section_wall_3_f_t"/>
+              <p1 v="59.4"/>
+              <p2 v="0.0"/>
+              <p3 v="11.0"/>
+            </obj>
+
+            <obj id="23" nm="node_section_wall_3_b_b">
+              <p0 v="node_section_wall_3_b_b"/>
+              <p1 v="59.4"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="0.75"/>
+            </obj>
+
+            <obj id="24" nm="node_section_wall_3_b_t">
+              <p0 v="node_section_wall_3_b_t"/>
+              <p1 v="59.4"/>
+              <p2 v="148.44975365143412"/>
+              <p3 v="11.0"/>
+            </obj>
+
+
+        </table>
+    </container>
+
+
+
+
+
+
+    <container id="{8708ED31-8E66-11D4-AD94-F6F5DE2BE344}" t="EP_DSG_Elements.EP_Plane.1">
+        <table id="C92EDB4A-35EE-43AB-A36B-6D136E7259A2" t="EP_DSG_Elements.EP_Plane.1" name="Member 2D">
+            <h>
+                <h0 t="Name"/>
+                <h1 t="Layer"/>
+                <h2 t="Material"/>
+                <h3 t="Type"/>
+                <h4 t="Thickness"/>
+                <h5 t="Table of geometry"/>
+                <h6 t="Internal nodes"/>
+                <h7 t="Swap orientation"/>
+                <h8 t="LCS angle"/>
+                <h9 t="FEM model"/>
+                <h10 t="Orthotropy"/>
+            </h>
+            <obj id="1" nm="floor slab">
+              <p0 v="floor slab"/>
+              <p2 i="0" n="concrete_slab"/>
+              <p3 v="0"/>
+              <p4 v="1.5"/>
+              <p5 t="">
+                <h>
+                  <h0 t="Closed curve"/>
+                  <h1 t="Node"/>
+                  <h2 t="Edge"/>
+                </h>
+                <row id="0">
+                  <p0 v="1"/>
+                  <p1 i="1" n="node_floor_1"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="1">
+                  <p0 v="1"/>
+                  <p1 i="2" n="node_floor_2"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="2">
+                  <p0 v="1"/>
+                  <p1 i="3" n="node_floor_3"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="3">
+                  <p0 v="1"/>
+                  <p1 i="4" n="node_floor_4"/>
+                  <p2 v="0"/>
+                </row>
+              </p5>
+            </obj>
+
+            <obj id="2" nm="roof slab">
+              <p0 v="roof slab"/>
+              <p2 i="0" n="concrete_slab"/>
+              <p3 v="0"/>
+              <p4 v="2.0"/>
+              <p5 t="">
+                <h>
+                  <h0 t="Closed curve"/>
+                  <h1 t="Node"/>
+                  <h2 t="Edge"/>
+                </h>
+                <row id="0">
+                  <p0 v="1"/>
+                  <p1 i="5" n="node_roof_1"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="1">
+                  <p0 v="1"/>
+                  <p1 i="6" n="node_roof_2"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="2">
+                  <p0 v="1"/>
+                  <p1 i="7" n="node_roof_3"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="3">
+                  <p0 v="1"/>
+                  <p1 i="8" n="node_roof_4"/>
+                  <p2 v="0"/>
+                </row>
+              </p5>
+            </obj>
+
+            <obj id="3" nm="section_slab_0">
+              <p0 v="section_slab_0"/>
+              <p2 i="0" n="concrete_slab"/>
+              <p3 v="0"/>
+              <p4 v="1.2"/>
+              <p5 t="">
+                <h>
+                  <h0 t="Closed curve"/>
+                  <h1 t="Node"/>
+                  <h2 t="Edge"/>
+                </h>
+                <row id="0">
+                  <p0 v="1"/>
+                  <p1 i="9" n="node_section_wall_0_f_b"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="1">
+                  <p0 v="1"/>
+                  <p1 i="11" n="node_section_wall_0_b_b"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="2">
+                  <p0 v="1"/>
+                  <p1 i="12" n="node_section_wall_0_b_t"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="3">
+                  <p0 v="1"/>
+                  <p1 i="10" n="node_section_wall_0_f_t"/>
+                  <p2 v="0"/>
+                </row>
+              </p5>
+            </obj>
+
+            <obj id="4" nm="section_slab_1">
+              <p0 v="section_slab_1"/>
+              <p2 i="0" n="concrete_slab"/>
+              <p3 v="0"/>
+              <p4 v="1.2"/>
+              <p5 t="">
+                <h>
+                  <h0 t="Closed curve"/>
+                  <h1 t="Node"/>
+                  <h2 t="Edge"/>
+                </h>
+                <row id="0">
+                  <p0 v="1"/>
+                  <p1 i="13" n="node_section_wall_1_f_b"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="1">
+                  <p0 v="1"/>
+                  <p1 i="15" n="node_section_wall_1_b_b"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="2">
+                  <p0 v="1"/>
+                  <p1 i="16" n="node_section_wall_1_b_t"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="3">
+                  <p0 v="1"/>
+                  <p1 i="14" n="node_section_wall_1_f_t"/>
+                  <p2 v="0"/>
+                </row>
+              </p5>
+            </obj>
+
+            <obj id="5" nm="section_slab_2">
+              <p0 v="section_slab_2"/>
+              <p2 i="0" n="concrete_slab"/>
+              <p3 v="0"/>
+              <p4 v="1.2"/>
+              <p5 t="">
+                <h>
+                  <h0 t="Closed curve"/>
+                  <h1 t="Node"/>
+                  <h2 t="Edge"/>
+                </h>
+                <row id="0">
+                  <p0 v="1"/>
+                  <p1 i="17" n="node_section_wall_2_f_b"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="1">
+                  <p0 v="1"/>
+                  <p1 i="19" n="node_section_wall_2_b_b"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="2">
+                  <p0 v="1"/>
+                  <p1 i="20" n="node_section_wall_2_b_t"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="3">
+                  <p0 v="1"/>
+                  <p1 i="18" n="node_section_wall_2_f_t"/>
+                  <p2 v="0"/>
+                </row>
+              </p5>
+            </obj>
+
+            <obj id="6" nm="section_slab_3">
+              <p0 v="section_slab_3"/>
+              <p2 i="0" n="concrete_slab"/>
+              <p3 v="0"/>
+              <p4 v="1.2"/>
+              <p5 t="">
+                <h>
+                  <h0 t="Closed curve"/>
+                  <h1 t="Node"/>
+                  <h2 t="Edge"/>
+                </h>
+                <row id="0">
+                  <p0 v="1"/>
+                  <p1 i="21" n="node_section_wall_3_f_b"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="1">
+                  <p0 v="1"/>
+                  <p1 i="23" n="node_section_wall_3_b_b"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="2">
+                  <p0 v="1"/>
+                  <p1 i="24" n="node_section_wall_3_b_t"/>
+                  <p2 v="0"/>
+                </row>
+                <row id="3">
+                  <p0 v="1"/>
+                  <p1 i="22" n="node_section_wall_3_f_t"/>
+                  <p2 v="0"/>
+                </row>
+              </p5>
+            </obj>
+
+
+        </table>
+    </container>
+
+
+
+
+
+
+
+
+
+
+
+   <container id="{1F4C3BA2-9235-4C0B-A940-4C72C9B59C30}" t="DataAddSupport.EP_SurfaceSupportSurface.1">
+      <table id="2083023A-128C-47C5-A4D5-09D152CF99D3" t="DataAddSupport.EP_SurfaceSupportSurface.1" name="Surface supports on surface">
+         <h>
+            <h0 t="Reference Table"/>
+            <h1 t="Subsoil"/>
+         </h>
+         <obj id="1" nm="SS1">
+           <p0 t="">
+             <h>
+               <h0 t="Member Type"/>
+               <h1 t="Member Type Name"/>
+               <h2 t="Member Id"/>
+               <h3 t="Member Name"/>
+             </h>
+             <row id="0">
+               <p0 v="{8708ED31-8E66-11D4-AD94-F6F5DE2BE344}"/>
+               <p1 v="EP_DSG_Elements.EP_Plane.1"/>
+               <p2 v="1"/>
+               <p3 v="floor slab"/>
+             </row>
+           </p0>
+           <p1 v="1"/>
+         </obj>
+
+
+      </table>
+   </container>
+
+
+
+    <container id="{F9D4AA72-49D5-11D4-A3CF-000000000000}" t="DataSetScia.EP_LoadGroup.1">
+        <table id="196E8F76-7A40-441C-81DB-6476DAC8BCFF" t="DataSetScia.EP_LoadGroup.1" name="Load groups">
+            <h>
+                <h0 t="Name"/>
+                <h1 t="Relation"/>
+                <h2 t="Load"/>
+                <h3 t="Type"/>
+            </h>
+            <obj id="1" nm="LG1">
+              <p0 v="LG1"/>
+              <p1 v="0"/>
+              <p2 v="1"/>
+              <p3 v="6"/>
+            </obj>
+
+
+        </table>
+    </container>
+
+
+    <container id="{0908D21F-481F-11D4-AB84-00C06C452330}" t="DataSetScia.EP_LoadCase.1">
+        <table id="CA2AF6CC-B980-4C45-AFE3-85EC125810E8" t="DataSetScia.EP_LoadCase.1" name="Load cases">
+            <h>
+                <h0 t="Name"/>
+                <h1 t="Action type"/>
+                <h2 t="Description"/>
+                <h3 t="Load group"/>
+                <h4 t="Load type"/>
+                <h5 t="Direction"/>
+                <h6 t="Specification"/>
+                <h7 t="Duration"/>
+                <h8 t="Master load case"/>
+            </h>
+            <obj id="1" nm="LC1">
+              <p0 v="LC1"/>
+              <p1 v="1"/>
+              <p2 v="first load case"/>
+              <p3 i="1" n="LG1"/>
+              <p4 v="0"/>
+              <p6 v="100"/>
+              <p7 v="2"/>
+            </obj>
+
+
+        </table>
+    </container>
+
+
+
+
+
+
+
+
+    <container id="{BC16B3CA-F464-11D4-94D3-000000000000}" t="DataAddLoad.EP_SurfaceForceSurface.1">
+        <table id="E459B7EB-FD08-4531-826F-E096323592DD" t="DataAddLoad.EP_SurfaceForceSurface.1" name="Forces on surface">
+            <h>
+                <h0 t="Name"/>
+                <h1 t="Load case"/>
+                <h2 t="Reference Table"/>
+                <h3 t="Direction"/>
+                <h4 t="Type"/>
+                <h5 t="Value"/>
+                <h6 t="System"/>
+                <h7 t="Location"/>
+            </h>
+            <obj id="1" nm="SF:1">
+              <p0 v="SF:1"/>
+              <p1 i="1" n="LC1"/>
+              <p2 t="">
+                <h>
+                  <h0 t="Member Type"/>
+                  <h1 t="Member Type Name"/>
+                  <h2 t="Member Id"/>
+                  <h3 t="Member Name"/>
+                </h>
+                <row id="0">
+                  <p0 v="{8708ED31-8E66-11D4-AD94-F6F5DE2BE344}"/>
+                  <p1 v="EP_DSG_Elements.EP_Plane.1"/>
+                  <p2 v="2"/>
+                  <p3 v="roof slab"/>
+                </row>
+              </p2>
+              <p3 v="2"/>
+              <p4 v="0"/>
+              <p5 v="-100000.0"/>
+              <p6 v="0"/>
+              <p7 v="0"/>
+            </obj>
+
+
+        </table>
+    </container>
+
+
+
+
+
+
+
+
+    <container id="{C0FBF7E1-4A71-11D4-AB86-00C06C452330}" t="DataSetSciaTom.EP_LoadCombi.1">
+        <table id="9F5CF12B-1690-400E-8030-62B13CE4E579" t="DataSetSciaTom.EP_LoadCombi.1" name="Combinations">
+            <h>
+                <h0 t="Name"/>
+                <h1 t="Type"/>
+                <h2 t="Load cases"/>
+            </h>
+            <obj id="1" nm="C1">
+              <p0 v="C1"/>
+              <p1 v="1"/>
+              <p2 t="">
+                <h>
+                  <h0 t="Name"/>
+                  <h1 t="Coeff."/>
+                  <h2 t="Load case ID"/>
+                </h>
+                <row id="0">
+                  <p0 v="LC1 - first load case"/>
+                  <p1 v="1"/>
+                  <p2 i="1" n="LC1"/>
+                </row>
+              </p2>
+            </obj>
+
+
+        </table>
+    </container>
+
+
+
+</project>

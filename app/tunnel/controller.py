@@ -102,9 +102,9 @@ class TunnelController(ViktorController):
         """ Perform an analysis using SCIA on a third-party worker and generate engineering report."""
         scia_model = self.create_scia_model(params)
         input_file, xml_def_file = scia_model.generate_xml_input()
-        scia_model = self.get_scia_input_esa()
+        scia_model_esa = self.get_scia_input_esa()
 
-        scia_analysis = SciaAnalysis(input_file=input_file, xml_def_file=xml_def_file, scia_model=scia_model,
+        scia_analysis = SciaAnalysis(input_file=input_file, xml_def_file=xml_def_file, scia_model=scia_model_esa,
                                      result_type=ResultType.ENGINEERING_REPORT, output_document='Report_1')
         scia_analysis.execute(timeout=600)
         engineering_report = scia_analysis.get_engineering_report(as_file=True)
@@ -139,14 +139,6 @@ class TunnelController(ViktorController):
             scia_input_esa.write(esa_file.read())
         return scia_input_esa
 
-    # def download_params(self, params, **kwargs):
-    #     # params.step1.geo_polyline = json.loads(str(params.step1.geo_polyline))
-    #     print(params.step1.geo_polyline)
-    #     line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
-    #     length = line_string.length / params.step1.segments
-    #     print(length)
-    #     # return DownloadResult(File.from_data(json.dumps(unmunchify(params)).encode()), "params.json")
-
     @staticmethod
     def get_segment_length(params):
         line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
@@ -154,7 +146,7 @@ class TunnelController(ViktorController):
 
     def create_scia_model(self, params) -> SciaModel:
         """"Create SCIA model"""
-        model = SciaModel()
+        scia_model = SciaModel()
 
         length = self.get_segment_length(params)
         width = params.step2.width
@@ -165,48 +157,48 @@ class TunnelController(ViktorController):
         material = SciaMaterial(0, 'concrete_slab')
 
         # floor
-        node_floor_1 = model.create_node('node_floor_1', 0, 0, floor_thickness / 2)
-        node_floor_2 = model.create_node('node_floor_2', 0, length, floor_thickness / 2)
-        node_floor_3 = model.create_node('node_floor_3', width, length, floor_thickness / 2)
-        node_floor_4 = model.create_node('node_floor_4', width, 0, floor_thickness / 2)
+        node_floor_1 = scia_model.create_node('node_floor_1', 0, 0, floor_thickness / 2)
+        node_floor_2 = scia_model.create_node('node_floor_2', 0, length, floor_thickness / 2)
+        node_floor_3 = scia_model.create_node('node_floor_3', width, length, floor_thickness / 2)
+        node_floor_4 = scia_model.create_node('node_floor_4', width, 0, floor_thickness / 2)
         floor_nodes = [node_floor_1, node_floor_2, node_floor_3, node_floor_4]
-        floor_plane = model.create_plane(floor_nodes, floor_thickness, name='floor slab', material=material)
+        floor_plane = scia_model.create_plane(floor_nodes, floor_thickness, name='floor slab', material=material)
 
         # roof
-        node_roof_1 = model.create_node('node_roof_1', 0, 0, height - roof_thickness / 2)
-        node_roof_2 = model.create_node('node_roof_2', 0, length, height - roof_thickness / 2)
-        node_roof_3 = model.create_node('node_roof_3', width, length, height - roof_thickness / 2)
-        node_roof_4 = model.create_node('node_roof_4', width, 0, height - roof_thickness / 2)
+        node_roof_1 = scia_model.create_node('node_roof_1', 0, 0, height - roof_thickness / 2)
+        node_roof_2 = scia_model.create_node('node_roof_2', 0, length, height - roof_thickness / 2)
+        node_roof_3 = scia_model.create_node('node_roof_3', width, length, height - roof_thickness / 2)
+        node_roof_4 = scia_model.create_node('node_roof_4', width, 0, height - roof_thickness / 2)
         roof_nodes = [node_roof_1, node_roof_2, node_roof_3, node_roof_4]
-        roof_plane = model.create_plane(roof_nodes, roof_thickness, name='roof slab', material=material)
+        roof_plane = scia_model.create_plane(roof_nodes, roof_thickness, name='roof slab', material=material)
 
         # section walls
         sections_x = np.linspace(wall_thickness / 2, width - (wall_thickness / 2), params.step2.number_of_sections + 1)
         for section_id, pile_x in enumerate(sections_x):
-            n_front_bottom = model.create_node(f'node_section_wall_{section_id}_f_b', pile_x, 0, floor_thickness / 2)
-            n_front_top = model.create_node(f'node_section_wall_{section_id}_f_t', pile_x, 0,
+            n_front_bottom = scia_model.create_node(f'node_section_wall_{section_id}_f_b', pile_x, 0, floor_thickness / 2)
+            n_front_top = scia_model.create_node(f'node_section_wall_{section_id}_f_t', pile_x, 0,
                                             height - roof_thickness / 2)
-            n_back_bottom = model.create_node(f'node_section_wall_{section_id}_b_b', pile_x, length,
+            n_back_bottom = scia_model.create_node(f'node_section_wall_{section_id}_b_b', pile_x, length,
                                               floor_thickness / 2)
-            n_back_top = model.create_node(f'node_section_wall_{section_id}_b_t', pile_x, length,
+            n_back_top = scia_model.create_node(f'node_section_wall_{section_id}_b_t', pile_x, length,
                                            height - roof_thickness / 2)
 
-            model.create_plane([n_front_bottom, n_back_bottom, n_back_top, n_front_top],
+            scia_model.create_plane([n_front_bottom, n_back_bottom, n_back_top, n_front_top],
                                wall_thickness,
                                name=f'section_slab_{section_id}',
                                material=material
                                )
 
         # create the support
-        subsoil = model.create_subsoil(name='subsoil', stiffness=params.step3.soil_stiffness)
-        model.create_surface_support(floor_plane, subsoil)
+        subsoil = scia_model.create_subsoil(name='subsoil', stiffness=params.step3.soil_stiffness)
+        scia_model.create_surface_support(floor_plane, subsoil)
 
         # create the load group
-        lg = model.create_load_group('LG1', LoadGroup.LoadOption.VARIABLE, LoadGroup.RelationOption.STANDARD,
+        lg = scia_model.create_load_group('LG1', LoadGroup.LoadOption.VARIABLE, LoadGroup.RelationOption.STANDARD,
                                      LoadGroup.LoadTypeOption.CAT_G)
 
         # create the load case
-        lc = model.create_variable_load_case('LC1', 'first load case', lg, LoadCase.VariableLoadType.STATIC,
+        lc = scia_model.create_variable_load_case('LC1', 'first load case', lg, LoadCase.VariableLoadType.STATIC,
                                              LoadCase.Specification.STANDARD, LoadCase.Duration.SHORT)
 
         # create the load combination
@@ -214,15 +206,15 @@ class TunnelController(ViktorController):
             lc: 1
         }
 
-        model.create_load_combination('C1', LoadCombination.Type.ENVELOPE_SERVICEABILITY, load_cases)
+        scia_model.create_load_combination('C1', LoadCombination.Type.ENVELOPE_SERVICEABILITY, load_cases)
 
         # create the load
         force = params.step3.roof_load
         force *= -1000  # in negative Z-direction and kN -> n
-        model.create_surface_load('SF:1', lc, roof_plane, SurfaceLoad.Direction.Z, SurfaceLoad.Type.FORCE, force,
+        scia_model.create_surface_load('SF:1', lc, roof_plane, SurfaceLoad.Direction.Z, SurfaceLoad.Type.FORCE, force,
                                   SurfaceLoad.CSys.GLOBAL, SurfaceLoad.Location.LENGTH)
 
-        return model
+        return scia_model
 
     def create_visualization_geometries(self, params, opacity=1.0):
         """The SCIA model is converted to VIKTOR geometry here"""
