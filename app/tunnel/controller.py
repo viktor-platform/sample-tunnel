@@ -99,7 +99,7 @@ class TunnelController(ViktorController):
 
     @PDFView("PDF View", duration_guess=20)
     def execute_scia_analysis(self, params, **kwargs):
-        """"perform an analysis using SCIA on a third-party worker"""
+        """ Perform an analysis using SCIA on a third-party worker and generate engineering report."""
         scia_model = self.create_scia_model(params)
         input_file, xml_def_file = scia_model.generate_xml_input()
         scia_model = self.get_scia_input_esa()
@@ -123,7 +123,7 @@ class TunnelController(ViktorController):
         scia_model = self.create_scia_model(params)
         input_xml, _ = scia_model.generate_xml_input()
 
-        return DownloadResult(input_xml, 'test.xml')
+        return DownloadResult(input_xml, 'viktor.xml')
 
     def download_scia_input_def(self, params, **kwargs):
         """"Download scia input def file."""
