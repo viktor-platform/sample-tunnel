@@ -195,12 +195,13 @@ class TunnelController(ViktorController):
         scia_model.create_surface_support(floor_plane, subsoil)
 
         # create the load group
-        load_group = scia_model.create_load_group('LG1', LoadGroup.LoadOption.VARIABLE, LoadGroup.RelationOption.STANDARD,
-                                     LoadGroup.LoadTypeOption.CAT_G)
+        load_group = scia_model.create_load_group('LG1', LoadGroup.LoadOption.VARIABLE,
+                                                  LoadGroup.RelationOption.STANDARD, LoadGroup.LoadTypeOption.CAT_G)
 
         # create the load case
-        load_case = scia_model.create_variable_load_case('LC1', 'first load case', load_group, LoadCase.VariableLoadType.STATIC,
-                                             LoadCase.Specification.STANDARD, LoadCase.Duration.SHORT)
+        load_case = scia_model.create_variable_load_case('LC1', 'first load case', load_group,
+                                                         LoadCase.VariableLoadType.STATIC,
+                                                         LoadCase.Specification.STANDARD, LoadCase.Duration.SHORT)
 
         # create the load combination
         load_cases = {
@@ -212,8 +213,8 @@ class TunnelController(ViktorController):
         # create the load
         force = params.step3.roof_load
         force *= -1000  # in negative Z-direction and kN -> n
-        scia_model.create_surface_load('SF:1', load_case, roof_plane, SurfaceLoad.Direction.Z, SurfaceLoad.Type.FORCE, force,
-                                  SurfaceLoad.CSys.GLOBAL, SurfaceLoad.Location.LENGTH)
+        scia_model.create_surface_load('SF:1', load_case, roof_plane, SurfaceLoad.Direction.Z, SurfaceLoad.Type.FORCE,
+                                       force, SurfaceLoad.CSys.GLOBAL, SurfaceLoad.Location.LENGTH)
 
         return scia_model
 
