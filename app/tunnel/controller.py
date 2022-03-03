@@ -14,7 +14,6 @@ SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import json
 from io import BytesIO
 from pathlib import Path
 
@@ -49,6 +48,7 @@ from viktor.views import MapResult
 from viktor.views import MapView
 from viktor.views import PDFResult
 from viktor.views import PDFView
+
 from .parametrization import TunnelParametrization
 
 
@@ -127,8 +127,8 @@ class TunnelController(ViktorController):
 
     def download_scia_input_def(self, params, **kwargs):
         """"Download scia input def file."""
-        m = SciaModel()
-        _, input_def = m.generate_xml_input()
+        scia_model = SciaModel()
+        _, input_def = scia_model.generate_xml_input()
         return DownloadResult(input_def, 'viktor.xml.def')
 
     def get_scia_input_esa(self) -> BytesIO:
@@ -175,7 +175,8 @@ class TunnelController(ViktorController):
         # section walls
         sections_x = np.linspace(wall_thickness / 2, width - (wall_thickness / 2), params.step2.number_of_sections + 1)
         for section_id, pile_x in enumerate(sections_x):
-            n_front_bottom = scia_model.create_node(f'node_section_wall_{section_id}_f_b', pile_x, 0, floor_thickness / 2)
+            n_front_bottom = scia_model.create_node(f'node_section_wall_{section_id}_f_b', pile_x, 0,
+                                                    floor_thickness / 2)
             n_front_top = scia_model.create_node(f'node_section_wall_{section_id}_f_t', pile_x, 0,
                                             height - roof_thickness / 2)
             n_back_bottom = scia_model.create_node(f'node_section_wall_{section_id}_b_b', pile_x, length,
@@ -194,16 +195,16 @@ class TunnelController(ViktorController):
         scia_model.create_surface_support(floor_plane, subsoil)
 
         # create the load group
-        lg = scia_model.create_load_group('LG1', LoadGroup.LoadOption.VARIABLE, LoadGroup.RelationOption.STANDARD,
+        load_group = scia_model.create_load_group('LG1', LoadGroup.LoadOption.VARIABLE, LoadGroup.RelationOption.STANDARD,
                                      LoadGroup.LoadTypeOption.CAT_G)
 
         # create the load case
-        lc = scia_model.create_variable_load_case('LC1', 'first load case', lg, LoadCase.VariableLoadType.STATIC,
+        load_case = scia_model.create_variable_load_case('LC1', 'first load case', load_group, LoadCase.VariableLoadType.STATIC,
                                              LoadCase.Specification.STANDARD, LoadCase.Duration.SHORT)
 
         # create the load combination
         load_cases = {
-            lc: 1
+            load_case: 1
         }
 
         scia_model.create_load_combination('C1', LoadCombination.Type.ENVELOPE_SERVICEABILITY, load_cases)
@@ -211,7 +212,7 @@ class TunnelController(ViktorController):
         # create the load
         force = params.step3.roof_load
         force *= -1000  # in negative Z-direction and kN -> n
-        scia_model.create_surface_load('SF:1', lc, roof_plane, SurfaceLoad.Direction.Z, SurfaceLoad.Type.FORCE, force,
+        scia_model.create_surface_load('SF:1', load_case, roof_plane, SurfaceLoad.Direction.Z, SurfaceLoad.Type.FORCE, force,
                                   SurfaceLoad.CSys.GLOBAL, SurfaceLoad.Location.LENGTH)
 
         return scia_model
@@ -309,40 +310,40 @@ class TunnelController(ViktorController):
             geometry_group.add(node_obj)
 
         # Draw lines for floor and roof
-        for z in [floor_thickness / 2, height_nodes]:
-            front = CircularExtrusion(0.2, Line(Point(0, 0, z), Point(width, 0, z)))
+        for z_axis in [floor_thickness / 2, height_nodes]:
+            front = CircularExtrusion(0.2, Line(Point(0, 0, z_axis), Point(width, 0, z_axis)))
             front.material = slab_material
             geometry_group.add(front)
 
-            right = CircularExtrusion(0.2, Line(Point(width, 0, z), Point(width, length, z)))
+            right = CircularExtrusion(0.2, Line(Point(width, 0, z_axis), Point(width, length, z_axis)))
             right.material = slab_material
             geometry_group.add(right)
 
-            back = CircularExtrusion(0.2, Line(Point(width, length, z), Point(0, length, z)))
+            back = CircularExtrusion(0.2, Line(Point(width, length, z_axis), Point(0, length, z_axis)))
             back.material = slab_material
             geometry_group.add(back)
 
-            left = CircularExtrusion(0.2, Line(Point(0, length, z), Point(0, 0, z)))
+            left = CircularExtrusion(0.2, Line(Point(0, length, z_axis), Point(0, 0, z_axis)))
             left.material = slab_material
             geometry_group.add(left)
 
         # Draw lines for all sections
         sections_x = np.linspace(wall_thickness / 2, width - (wall_thickness / 2), params.step2.number_of_sections + 1)
-        for x in sections_x:
-            front = CircularExtrusion(0.2, Line(Point(x, 0, floor_thickness / 2), Point(x, 0, height_nodes)))
+        for x_axis in sections_x:
+            front = CircularExtrusion(0.2, Line(Point(x_axis, 0, floor_thickness / 2), Point(x_axis, 0, height_nodes)))
             front.material = slab_material
             geometry_group.add(front)
 
-            back = CircularExtrusion(0.2, Line(Point(x, length, floor_thickness / 2), Point(x, length, height_nodes)))
+            back = CircularExtrusion(0.2, Line(Point(x_axis, length, floor_thickness / 2), Point(x_axis, length, height_nodes)))
             back.material = slab_material
             geometry_group.add(back)
 
             bottom = CircularExtrusion(0.2,
-                                       Line(Point(x, 0, floor_thickness / 2), Point(x, length, floor_thickness / 2)))
+                                       Line(Point(x_axis, 0, floor_thickness / 2), Point(x_axis, length, floor_thickness / 2)))
             bottom.material = slab_material
             geometry_group.add(bottom)
 
-            top = CircularExtrusion(0.2, Line(Point(x, 0, height_nodes), Point(x, length, height_nodes)))
+            top = CircularExtrusion(0.2, Line(Point(x_axis, 0, height_nodes), Point(x_axis, length, height_nodes)))
             top.material = slab_material
             geometry_group.add(top)
 
