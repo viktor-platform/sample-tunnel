@@ -41,8 +41,8 @@ class TunnelParametrization(Parametrization):
     step3.roof_load = NumberField('Roof load', default=1, suffix='kN/m2')
     step3.soil_stiffness = NumberField('Soil stiffness', default=400, suffix='MN/m')
     step3.ln_break0 = LineBreak()
-    step3.input_xml_btn = DownloadButton('Input .xml', method='download_scia_input_xml')
-    step3.input_def_btn = DownloadButton('Input .def', method='download_scia_input_def')
-    step3.input_esa_btn = DownloadButton('Input .esa', method='download_scia_input_esa')
+    step3.input_xml_btn = DownloadButton('viktor.xml', method='download_scia_input_xml')
+    step3.input_def_btn = DownloadButton('viktor.xml.def', method='download_scia_input_def')
+    step3.input_esa_btn = DownloadButton('model.esa', method='download_scia_input_esa')
 
     step4 = Step('Analyse engineering report', views='execute_scia_analysis')

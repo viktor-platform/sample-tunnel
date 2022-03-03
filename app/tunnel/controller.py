@@ -72,8 +72,8 @@ class TunnelController(ViktorController):
             begin = i * segment_length
             end = (i + 1) * segment_length
             line_string_sub = substring(line_string, begin, end)
-            left_line = line_string_sub.parallel_offset(40, 'left')
-            right_line = line_string_sub.parallel_offset(40, 'right')
+            left_line = line_string_sub.parallel_offset(params.step2.width, 'left')
+            right_line = line_string_sub.parallel_offset(params.step2.width, 'right')
             linestring_points = list(left_line.coords) + list(right_line.coords)
             polygon = GeoPolygon(*[GeoPoint.from_rd(pt) for pt in linestring_points])
             features.append(MapPolygon.from_geo_polygon(polygon))
@@ -99,7 +99,7 @@ class TunnelController(ViktorController):
 
     @PDFView("PDF View", duration_guess=20)
     def execute_scia_analysis(self, params, **kwargs):
-        """"perform an analysis using SCIA on a third-party worker"""
+        """ Perform an analysis using SCIA on a third-party worker and generate engineering report."""
         scia_model = self.create_scia_model(params)
         input_file, xml_def_file = scia_model.generate_xml_input()
         scia_model = self.get_scia_input_esa()
@@ -123,7 +123,7 @@ class TunnelController(ViktorController):
         scia_model = self.create_scia_model(params)
         input_xml, _ = scia_model.generate_xml_input()
 
-        return DownloadResult(input_xml, 'test.xml')
+        return DownloadResult(input_xml, 'viktor.xml')
 
     def download_scia_input_def(self, params, **kwargs):
         """"Download scia input def file."""

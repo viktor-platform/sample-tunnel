@@ -1,2 +1,2 @@
-# viktor==12.9.0
+# viktor==12.10.0
 shapely
