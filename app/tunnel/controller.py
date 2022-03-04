@@ -132,7 +132,7 @@ class TunnelController(ViktorController):
         return DownloadResult(input_def, 'viktor.xml.def')
 
     def get_scia_input_esa(self) -> BytesIO:
-        """"Retrieves the model.esa file."""
+        """Retrieves the model.esa file."""
         esa_path = Path(__file__).parent / 'scia' / 'model.esa'
         scia_input_esa = BytesIO()
         with open(esa_path, "rb") as esa_file:
@@ -141,11 +141,12 @@ class TunnelController(ViktorController):
 
     @staticmethod
     def get_segment_length(params):
+        """ Calculates the length of the tunnel segment."""
         line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
         return line_string.length / params.step1.segments
 
     def create_scia_model(self, params) -> SciaModel:
-        """"Create SCIA model"""
+        """ Create SCIA model"""
         scia_model = SciaModel()
 
         length = self.get_segment_length(params)
@@ -178,17 +179,17 @@ class TunnelController(ViktorController):
             n_front_bottom = scia_model.create_node(f'node_section_wall_{section_id}_f_b', pile_x, 0,
                                                     floor_thickness / 2)
             n_front_top = scia_model.create_node(f'node_section_wall_{section_id}_f_t', pile_x, 0,
-                                            height - roof_thickness / 2)
+                                                 height - roof_thickness / 2)
             n_back_bottom = scia_model.create_node(f'node_section_wall_{section_id}_b_b', pile_x, length,
-                                              floor_thickness / 2)
+                                                   floor_thickness / 2)
             n_back_top = scia_model.create_node(f'node_section_wall_{section_id}_b_t', pile_x, length,
-                                           height - roof_thickness / 2)
+                                                height - roof_thickness / 2)
 
             scia_model.create_plane([n_front_bottom, n_back_bottom, n_back_top, n_front_top],
-                               wall_thickness,
-                               name=f'section_slab_{section_id}',
-                               material=material
-                               )
+                                    wall_thickness,
+                                    name=f'section_slab_{section_id}',
+                                    material=material
+                                    )
 
         # create the support
         subsoil = scia_model.create_subsoil(name='subsoil', stiffness=params.step3.soil_stiffness)
@@ -219,7 +220,7 @@ class TunnelController(ViktorController):
         return scia_model
 
     def create_visualization_geometries(self, params, opacity=1.0):
-        """The SCIA model is converted to VIKTOR geometry here"""
+        """Creates a visualization of the tunnel"""
         geometry_group = Group([])
         length = self.get_segment_length(params)
         width = params.step2.width
@@ -294,6 +295,7 @@ class TunnelController(ViktorController):
         return geometry_group
 
     def create_structure_visualization(self, params, scia_model):
+        """ Creates the visualization of the structure of how it will look in scia."""
         geometry_group = Group([])
         length = self.get_segment_length(params)
         floor_thickness = params.step2.floor_thickness
@@ -335,12 +337,14 @@ class TunnelController(ViktorController):
             front.material = slab_material
             geometry_group.add(front)
 
-            back = CircularExtrusion(0.2, Line(Point(x_axis, length, floor_thickness / 2), Point(x_axis, length, height_nodes)))
+            back = CircularExtrusion(0.2,
+                                     Line(Point(x_axis, length, floor_thickness / 2),
+                                          Point(x_axis, length, height_nodes)))
             back.material = slab_material
             geometry_group.add(back)
 
-            bottom = CircularExtrusion(0.2,
-                                       Line(Point(x_axis, 0, floor_thickness / 2), Point(x_axis, length, floor_thickness / 2)))
+            bottom = CircularExtrusion(0.2, Line(Point(x_axis, 0, floor_thickness / 2),
+                                                 Point(x_axis, length, floor_thickness / 2)))
             bottom.material = slab_material
             geometry_group.add(bottom)
 
