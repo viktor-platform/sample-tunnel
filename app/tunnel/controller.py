@@ -66,17 +66,19 @@ class TunnelController(ViktorController):
 
         features = []
 
-        line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
-        segment_length = line_string.length / params.step1.segments
+        tunnel_line_string = LineString([pt.rd for pt in params.step1.geo_polyline.points])
+        segment_length = tunnel_line_string.length / params.step1.segments
         for i in range(0, params.step1.segments):
             begin = i * segment_length
             end = (i + 1) * segment_length
-            line_string_sub = substring(line_string, begin, end)
-            left_line = line_string_sub.parallel_offset(params.step2.width, 'left')
-            right_line = line_string_sub.parallel_offset(params.step2.width, 'right')
-            linestring_points = list(left_line.coords) + list(right_line.coords)
-            polygon = GeoPolygon(*[GeoPoint.from_rd(pt) for pt in linestring_points])
-            features.append(MapPolygon.from_geo_polygon(polygon))
+
+            segment_line_string = substring(tunnel_line_string, begin, end)
+            segment_left_line = segment_line_string.parallel_offset(params.step2.width, 'left')
+            segment_right_line = segment_line_string.parallel_offset(params.step2.width, 'right')
+            segment_linestring_coords = list(segment_left_line.coords) + list(segment_right_line.coords)
+
+            segment_polygon = GeoPolygon(*[GeoPoint.from_rd(coordinate) for coordinate in segment_linestring_coords])
+            features.append(MapPolygon.from_geo_polygon(segment_polygon))
 
         features.append(MapPolyline.from_geo_polyline(params.step1.geo_polyline))
         return MapResult(features)
@@ -114,7 +116,6 @@ class TunnelController(ViktorController):
     def download_scia_input_esa(self, params, **kwargs):
         """"Download scia input esa file"""
         scia_input_esa = self.get_scia_input_esa()
-
         filename = "model.esa"
         return DownloadResult(scia_input_esa, filename)
 

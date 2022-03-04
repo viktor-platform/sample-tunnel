@@ -67,7 +67,7 @@ class TestTunnelController(unittest.TestCase):
     @patch('viktor.external.scia.Model.generate_xml_input', generate_xml_input_mock)
     @patch('app.tunnel.controller.SciaAnalysis.execute', scia_analysis_execute_mock)
     @patch('app.tunnel.controller.SciaAnalysis.get_engineering_report', scia_analysis_get_engineering_report_mock)
-    def test_a(self):
+    def test_execute_scia_analysis(self):
         """ Test TunnelController.execute_scia_analysis. It mocks some methods since they are using API calls."""
         pdf_result = self.controller.execute_scia_analysis(self.controller, params=self.params)
         self.assertIsInstance(pdf_result, PDFResult)
