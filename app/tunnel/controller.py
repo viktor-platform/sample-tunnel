@@ -193,7 +193,7 @@ class TunnelController(ViktorController):
                                     )
 
         # create the support
-        subsoil = scia_model.create_subsoil(name='subsoil', stiffness=params.step3.soil_stiffness)
+        subsoil = scia_model.create_subsoil(name='subsoil', stiffness=params.step3.soil_stiffness * 1e06)
         scia_model.create_surface_support(floor_plane, subsoil)
 
         # create the load group
