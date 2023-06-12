@@ -39,6 +39,12 @@ from viktor.geometry import Line
 from viktor.geometry import Material
 from viktor.geometry import Point
 from viktor.geometry import Sphere
+from viktor.parametrization import DownloadButton
+from viktor.parametrization import GeoPolylineField
+from viktor.parametrization import LineBreak
+from viktor.parametrization import NumberField
+from viktor.parametrization import Parametrization
+from viktor.parametrization import Step
 from viktor.result import DownloadResult
 from viktor.views import GeometryResult
 from viktor.views import GeometryView
@@ -49,7 +55,30 @@ from viktor.views import MapView
 from viktor.views import PDFResult
 from viktor.views import PDFView
 
-from .parametrization import TunnelParametrization
+
+class TunnelParametrization(Parametrization):
+    """Defines the input fields in left-side of the web UI in the Sample entity (Editor)."""
+    step1 = Step('Select tunnel location', views='visualize_tunnel')
+    step1.geo_polyline = GeoPolylineField('Location of tunnel')
+    step1.segments = NumberField('Number of segments', default=5)
+
+    step2 = Step('Define cross section', views='visualize_tunnel_segment')
+    step2.width = NumberField('Total width', default=40, suffix='m')
+    step2.height = NumberField('Total height', default=12, suffix='m')
+    step2.number_of_sections = NumberField('Number of sections', default=2, step=0.1)
+    step2.floor_thickness = NumberField('Floor thickness', default=1.5, suffix='m', step=0.1)
+    step2.roof_thickness = NumberField('Roof thickness', default=2, suffix='m', step=0.1)
+    step2.wall_thickness = NumberField('Wall thickness', default=1.2, suffix='m', step=0.1)
+
+    step3 = Step('Create SCIA model', views='visualize_tunnel_structure')
+    step3.roof_load = NumberField('Roof load', default=100, suffix='kN/m2')
+    step3.soil_stiffness = NumberField('Soil stiffness', default=400, suffix='MN/m')
+    step3.ln_break0 = LineBreak()
+    step3.input_xml_btn = DownloadButton('viktor.xml', method='download_scia_input_xml')
+    step3.input_def_btn = DownloadButton('viktor.xml.def', method='download_scia_input_def')
+    step3.input_esa_btn = DownloadButton('model.esa', method='download_scia_input_esa')
+
+    step4 = Step('Analyse engineering report', views='execute_scia_analysis')
 
 
 class TunnelController(ViktorController):
