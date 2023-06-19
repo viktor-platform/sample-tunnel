@@ -1,5 +1,4 @@
 import json
-import os
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -10,7 +9,7 @@ from viktor.geometry import GeoPolyline
 from viktor.views import MapResult
 from viktor.views import PDFResult
 
-from app.tunnel.controller import TunnelController
+from controller import TunnelController
 
 
 class TestTunnelController(unittest.TestCase):

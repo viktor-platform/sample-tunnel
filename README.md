@@ -14,13 +14,13 @@ This app consists of 4 steps:
 4. generate a pdf showing the internal stress of the tunnel (this can take around 60 seconds)
 
 ###Step 1: Select tunnel location
-![](manifest/groene_boog_tunnel.png)
+![](groene_boog_tunnel.png)
 
 ###Step 2: Define cross section
-![](manifest/tunnel_segment.png)
+![](tunnel_segment.png)
 
 ###Step 3: Create SCIA model
-![](manifest/tunnel_scia_model.png)
+![](tunnel_scia_model.png)
 
 ###Step 4: Generate engineering report
-![](manifest/engineering_report.png)
+![](engineering_report.png)
