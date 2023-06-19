@@ -55,16 +55,13 @@ from viktor.views import MapView
 from viktor.views import PDFResult
 from viktor.views import PDFView
 
-<<<<<<< HEAD
+
 from viktor.parametrization import DownloadButton
 from viktor.parametrization import GeoPolylineField
 from viktor.parametrization import LineBreak
 from viktor.parametrization import NumberField
 from viktor.parametrization import Parametrization
 from viktor.parametrization import Step
-
-=======
->>>>>>> 5efc6f682dc132102de37de06ffc074c738ad639
 
 class TunnelParametrization(Parametrization):
     """Defines the input fields in left-side of the web UI in the Sample entity (Editor)."""
@@ -89,11 +86,6 @@ class TunnelParametrization(Parametrization):
     step3.input_esa_btn = DownloadButton('model.esa', method='download_scia_input_esa')
 
     step4 = Step('Analyse engineering report', views='execute_scia_analysis')
-<<<<<<< HEAD
-
-=======
->>>>>>> 5efc6f682dc132102de37de06ffc074c738ad639
-
 
 class TunnelController(ViktorController):
     """Controller class which acts as interface for the Sample entity type."""
